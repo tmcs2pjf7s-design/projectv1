@@ -66,6 +66,23 @@ function AdminContent() {
           ))}
         </div>
 
+        <h2 className="font-black text-lg mb-4">Accesos rápidos</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          {[
+            { href: '/cocina', icon: '👨‍🍳', label: 'Cocina', sub: 'Tiempo real' },
+            { href: '/comandero', icon: '🧑‍💼', label: 'Comandero', sub: 'Gestión mesas' },
+            { href: '/llevar', icon: '🛵', label: 'Para llevar', sub: 'Hacer pedido' },
+            { href: '/menu', icon: '📋', label: 'Ver menú', sub: 'Carta digital' },
+          ].map(a => (
+            <Link key={a.href} href={a.href}
+              className="flex flex-col items-center gap-2 bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-shadow text-center">
+              <span className="text-3xl">{a.icon}</span>
+              <span className="font-semibold text-sm">{a.label}</span>
+              <span className="text-gray-400 text-xs">{a.sub}</span>
+            </Link>
+          ))}
+        </div>
+
         <h2 className="font-black text-lg mb-4">Gestión</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
           <Link href="/admin/menu" className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">

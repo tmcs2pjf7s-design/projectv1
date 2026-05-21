@@ -10,8 +10,8 @@ export default function Home() {
           <div className="flex items-center gap-5">
             <Link href="/menu" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Menú</Link>
             <Link href="/llevar" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Para llevar</Link>
-            <Link href="/admin" className="text-sm bg-gray-900 text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-700 transition-colors">
-              Admin
+            <Link href="/admin/login" className="text-sm bg-gray-900 text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-700 transition-colors">
+              Iniciar sesión
             </Link>
           </div>
         </div>
@@ -97,32 +97,6 @@ export default function Home() {
                 <h3 className="text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Staff */}
-      <section className="py-16 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto px-5">
-          <p className="text-gray-400 text-sm text-center mb-6 font-medium uppercase tracking-widest">
-            Accesos del equipo
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            {[
-              { href: '/cocina', icon: '👨‍🍳', label: 'Pantalla cocina', sub: 'Pedidos en tiempo real' },
-              { href: '/comandero', icon: '🧑‍💼', label: 'Comandero', sub: 'Gestión de mesas' },
-              { href: '/admin', icon: '⚙️', label: 'Administración', sub: 'Menú, mesas y estadísticas' },
-            ].map(a => (
-              <Link
-                key={a.href}
-                href={a.href}
-                className="flex flex-col items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 transition-colors text-center"
-              >
-                <span className="text-3xl">{a.icon}</span>
-                <span className="font-semibold text-sm">{a.label}</span>
-                <span className="text-gray-400 text-xs">{a.sub}</span>
-              </Link>
             ))}
           </div>
         </div>
