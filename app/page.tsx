@@ -6,7 +6,7 @@ export default function Home() {
       {/* Navbar */}
       <nav className="fixed top-0 inset-x-0 bg-white/90 backdrop-blur-md border-b border-gray-100 z-40">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-          <span className="text-xl font-black tracking-tight">Restaurante</span>
+          <span className="text-xl font-black tracking-tight">Frankfurt Els Tr3s</span>
           <div className="flex items-center gap-5">
             <Link href="/menu" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Menú</Link>
             <Link href="/llevar" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Para llevar</Link>
@@ -26,12 +26,12 @@ export default function Home() {
               Bienvenidos
             </p>
             <h1 className="text-5xl lg:text-6xl font-black tracking-tight text-gray-900 mb-6 leading-[1.05]">
-              El placer de<br />
-              <span className="text-accent">comer bien.</span>
+              Frankfurt<br />
+              <span className="text-accent">Els Tr3s.</span>
             </h1>
             <p className="text-xl text-gray-500 mb-10 max-w-md leading-relaxed">
-              Cocina de autor con productos frescos de temporada.
-              Pide desde tu mesa escaneando el QR o haz tu pedido para llevar.
+              Los mejores bocadillos de Frankfurt y hamburguesas.
+              Pide desde tu mesa o llévate tu pedido.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
