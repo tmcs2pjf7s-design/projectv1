@@ -4,45 +4,49 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navbar */}
-      <nav className="fixed top-0 inset-x-0 bg-white/90 backdrop-blur-md border-b border-gray-100 z-40">
-        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-          <span className="text-xl font-black tracking-tight">Frankfurt Els Tr3s</span>
-          <div className="flex items-center gap-5">
-            <Link href="/menu" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Menú</Link>
-            <Link href="/llevar" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Para llevar</Link>
+      <nav className="fixed top-0 inset-x-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-40">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <span className="text-lg font-black tracking-tight">Frankfurt Els Tr3s</span>
+          <div className="flex items-center gap-1">
+            <Link href="/menu" className="text-sm text-gray-600 hover:text-gray-900 font-medium px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+              Menú
+            </Link>
+            <Link href="/llevar" className="text-sm text-gray-600 hover:text-gray-900 font-medium px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors hidden sm:block">
+              Para llevar
+            </Link>
             <Link href="/admin/login" className="text-sm bg-gray-900 text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-700 transition-colors">
-              Iniciar sesión
+              Entrar
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="pt-16 min-h-screen flex items-center relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/60 via-white to-white" />
-        <div className="relative max-w-6xl mx-auto px-5 py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section className="pt-14 min-h-screen flex items-center relative overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/70 via-white to-white" />
+        <div className="relative max-w-6xl mx-auto px-5 py-16 lg:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full">
           <div>
-            <p className="text-accent text-sm font-bold tracking-widest uppercase mb-3">
+            <p className="text-accent text-xs sm:text-sm font-bold tracking-widest uppercase mb-3">
               Bienvenidos
             </p>
-            <h1 className="text-5xl lg:text-6xl font-black tracking-tight text-gray-900 mb-6 leading-[1.05]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-gray-900 mb-5 leading-[1.05]">
               Frankfurt<br />
               <span className="text-accent">Els Tr3s.</span>
             </h1>
-            <p className="text-xl text-gray-500 mb-10 max-w-md leading-relaxed">
+            <p className="text-base sm:text-xl text-gray-500 mb-8 max-w-md leading-relaxed">
               Los mejores bocadillos de Frankfurt y hamburguesas.
               Pide desde tu mesa o llévate tu pedido.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Link
                 href="/llevar"
-                className="bg-accent text-white px-7 py-4 rounded-2xl font-bold text-base hover:bg-accent-dark transition-colors shadow-lg shadow-orange-200"
+                className="bg-accent text-white px-7 py-4 rounded-2xl font-bold text-base hover:bg-accent-dark transition-colors shadow-lg shadow-orange-200 text-center active:scale-95"
               >
                 🛵 Pedir para llevar
               </Link>
               <Link
                 href="/menu"
-                className="bg-gray-100 text-gray-900 px-7 py-4 rounded-2xl font-bold text-base hover:bg-gray-200 transition-colors"
+                className="bg-gray-100 text-gray-900 px-7 py-4 rounded-2xl font-bold text-base hover:bg-gray-200 transition-colors text-center active:scale-95"
               >
                 Ver menú
               </Link>
@@ -56,45 +60,28 @@ export default function Home() {
               'https://images.unsplash.com/photo-1567171466295-4afa63d45416?w=300&q=80',
               'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&q=80',
             ].map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt=""
-                className={`rounded-2xl object-cover w-full h-48 shadow-md ${i === 1 ? 'mt-8' : ''}`}
-              />
+              <img key={i} src={src} alt="" className={`rounded-2xl object-cover w-full h-48 shadow-md ${i === 1 ? 'mt-8' : ''}`} />
             ))}
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-16 sm:py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-5">
-          <h2 className="text-3xl font-black text-center mb-4">Una nueva forma de pedir</h2>
-          <p className="text-gray-500 text-center mb-14 max-w-xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-black text-center mb-3">Una nueva forma de pedir</h2>
+          <p className="text-gray-500 text-center mb-10 sm:mb-14 max-w-xl mx-auto text-sm sm:text-base">
             Sin esperas, sin confusiones. Tecnología al servicio de la buena mesa.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              {
-                icon: '📱',
-                title: 'Escanea el QR',
-                desc: 'Escanea el QR de tu mesa, elige lo que quieres y pide directamente desde tu móvil.',
-              },
-              {
-                icon: '⚡',
-                title: 'Tiempo real',
-                desc: 'La cocina recibe tu pedido al instante. Sigue su estado en vivo desde tu pantalla.',
-              },
-              {
-                icon: '🛵',
-                title: 'Para llevar',
-                desc: 'Haz tu pedido online antes de llegar. Estará listo cuando aparezcas.',
-              },
+              { icon: '📱', title: 'Escanea el QR', desc: 'Escanea el QR de tu mesa, elige lo que quieres y pide directamente desde tu móvil.' },
+              { icon: '⚡', title: 'Tiempo real', desc: 'La cocina recibe tu pedido al instante. Sigue su estado en vivo desde tu pantalla.' },
+              { icon: '🛵', title: 'Para llevar', desc: 'Haz tu pedido online antes de llegar. Estará listo cuando aparezcas.' },
             ].map(f => (
-              <div key={f.title} className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="text-4xl mb-4">{f.icon}</div>
-                <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+              <div key={f.title} className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+                <div className="text-4xl mb-3">{f.icon}</div>
+                <h3 className="text-base sm:text-lg font-bold mb-2">{f.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -102,8 +89,19 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-gray-900 border-t border-white/10 py-8 text-center text-gray-500 text-sm">
-        © 2026 Restaurante · Todos los derechos reservados
+      {/* Mobile CTA */}
+      <section className="py-10 bg-accent sm:hidden">
+        <div className="px-5 text-center">
+          <p className="text-white/80 text-sm font-medium mb-3">¿Listo para pedir?</p>
+          <Link href="/llevar"
+            className="inline-block bg-white text-accent px-8 py-4 rounded-2xl font-black text-base w-full active:scale-95 transition-transform">
+            🛵 Pedir para llevar
+          </Link>
+        </div>
+      </section>
+
+      <footer className="bg-gray-900 py-8 text-center text-gray-500 text-sm">
+        © 2026 Frankfurt Els Tr3s · Todos los derechos reservados
       </footer>
     </div>
   )

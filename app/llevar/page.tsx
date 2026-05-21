@@ -306,8 +306,14 @@ export default function LlevarPage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-4 pb-28">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <main className="max-w-2xl mx-auto px-4 py-3 pb-28">
+        <div className="space-y-2">
+          {filtrados.length === 0 && cat === '' && (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              <p className="text-gray-400 text-sm">Cargando...</p>
+            </div>
+          )}
           {filtrados.map(p => <MenuCard key={p.id} producto={p} />)}
         </div>
       </main>
