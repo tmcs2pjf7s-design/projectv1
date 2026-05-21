@@ -35,27 +35,38 @@ export default function Carrito({ onConfirmar, loading }: Props) {
           </div>
 
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
-            {items.map(item => (
-              <div key={item.producto.id} className="flex items-center gap-4">
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{item.producto.nombre}</p>
-                  <p className="text-accent text-sm font-semibold">
-                    {(item.producto.precio * item.cantidad).toFixed(2)}€
-                  </p>
+            {items.map(item => {
+              const precio = item.variante?.precio ?? item.producto.precio
+              const key = item.variante ? `${item.producto.id}-${item.variante.nombre}` : item.producto.id
+              return (
+                <div key={key} className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">
+                      {item.producto.nombre}
+                      {item.variante && (
+                        <span className="ml-1.5 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-md font-normal">
+                          {item.variante.nombre}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-accent text-sm font-semibold">
+                      {(precio * item.cantidad).toFixed(2)}€
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateQty(item.producto.id, item.cantidad - 1, item.variante)}
+                      className="w-8 h-8 rounded-full border border-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg"
+                    >−</button>
+                    <span className="w-5 text-center font-semibold">{item.cantidad}</span>
+                    <button
+                      onClick={() => updateQty(item.producto.id, item.cantidad + 1, item.variante)}
+                      className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg"
+                    >+</button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQty(item.producto.id, item.cantidad - 1)}
-                    className="w-8 h-8 rounded-full border border-gray-200 text-gray-600 flex items-center justify-center font-bold text-lg"
-                  >−</button>
-                  <span className="w-5 text-center font-semibold">{item.cantidad}</span>
-                  <button
-                    onClick={() => updateQty(item.producto.id, item.cantidad + 1)}
-                    className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg"
-                  >+</button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
 
             <div className="pt-2">
               <textarea

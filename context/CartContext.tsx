@@ -1,12 +1,15 @@
 'use client'
 import { createContext, useContext, useState, ReactNode } from 'react'
-import { CartItem, Producto } from '@/lib/types'
+import { CartItem, Producto, Variante } from '@/lib/types'
+
+const cartKey = (productoId: string, variante?: Variante) =>
+  variante ? `${productoId}-${variante.nombre}` : productoId
 
 interface CartCtx {
   items: CartItem[]
-  addItem: (p: Producto) => void
-  removeItem: (id: string) => void
-  updateQty: (id: string, qty: number) => void
+  addItem: (p: Producto, variante?: Variante) => void
+  removeItem: (productoId: string, variante?: Variante) => void
+  updateQty: (productoId: string, qty: number, variante?: Variante) => void
   clearCart: () => void
   total: number
   count: number
@@ -17,24 +20,35 @@ const CartContext = createContext<CartCtx | undefined>(undefined)
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
 
-  const addItem = (p: Producto) =>
+  const addItem = (p: Producto, variante?: Variante) => {
+    const key = cartKey(p.id, variante)
     setItems(prev => {
-      const found = prev.find(i => i.producto.id === p.id)
+      const found = prev.find(i => cartKey(i.producto.id, i.variante) === key)
       return found
-        ? prev.map(i => i.producto.id === p.id ? { ...i, cantidad: i.cantidad + 1 } : i)
-        : [...prev, { producto: p, cantidad: 1 }]
+        ? prev.map(i => cartKey(i.producto.id, i.variante) === key ? { ...i, cantidad: i.cantidad + 1 } : i)
+        : [...prev, { producto: p, cantidad: 1, variante }]
     })
+  }
 
-  const removeItem = (id: string) =>
-    setItems(prev => prev.filter(i => i.producto.id !== id))
+  const removeItem = (productoId: string, variante?: Variante) => {
+    const key = cartKey(productoId, variante)
+    setItems(prev => prev.filter(i => cartKey(i.producto.id, i.variante) !== key))
+  }
 
-  const updateQty = (id: string, qty: number) => {
-    if (qty <= 0) return removeItem(id)
-    setItems(prev => prev.map(i => i.producto.id === id ? { ...i, cantidad: qty } : i))
+  const updateQty = (productoId: string, qty: number, variante?: Variante) => {
+    if (qty <= 0) return removeItem(productoId, variante)
+    const key = cartKey(productoId, variante)
+    setItems(prev => prev.map(i =>
+      cartKey(i.producto.id, i.variante) === key ? { ...i, cantidad: qty } : i
+    ))
   }
 
   const clearCart = () => setItems([])
-  const total = items.reduce((s, i) => s + i.producto.precio * i.cantidad, 0)
+
+  const precioItem = (item: CartItem) =>
+    (item.variante?.precio ?? item.producto.precio) * item.cantidad
+
+  const total = items.reduce((s, i) => s + precioItem(i), 0)
   const count = items.reduce((s, i) => s + i.cantidad, 0)
 
   return (

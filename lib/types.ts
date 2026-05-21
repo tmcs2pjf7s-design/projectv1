@@ -14,6 +14,7 @@ export interface Producto {
   imagen?: string
   disponible: boolean
   tiempo_prep: number
+  variantes?: Variante[]
 }
 
 export interface Mesa {
@@ -57,8 +58,14 @@ export interface Pedido {
   created_at: string
 }
 
+export interface Variante {
+  nombre: string
+  precio: number
+}
+
 export interface CartItem {
   producto: Producto
   cantidad: number
+  variante?: Variante
   notas?: string
 }
