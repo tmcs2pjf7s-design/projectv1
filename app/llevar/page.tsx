@@ -6,7 +6,9 @@ import { Categoria, Producto } from '@/lib/types'
 import MenuCard from '@/components/MenuCard'
 import { useCart } from '@/context/CartContext'
 
-type Step = 'menu' | 'datos' | 'confirmado'
+type Step = 'menu' | 'auth' | 'datos' | 'confirmado'
+
+interface Cliente { id: string; nombre: string; email: string; telefono: string }
 
 export default function LlevarPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
@@ -17,6 +19,12 @@ export default function LlevarPage() {
   const [numPedido, setNumPedido] = useState(0)
   const [pago, setPago] = useState<'bar' | 'online'>('bar')
   const [form, setForm] = useState({ nombre: '', telefono: '', notas: '' })
+  const [cliente, setCliente] = useState<Cliente | null>(null)
+
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [authForm, setAuthForm] = useState({ nombre: '', email: '', password: '', telefono: '' })
+  const [authError, setAuthError] = useState('')
+  const [authLoading, setAuthLoading] = useState(false)
 
   const { clearCart, total, count, items } = useCart()
 
@@ -26,9 +34,45 @@ export default function LlevarPage() {
       setProductos(prods)
       if (cats.length) setCat(cats[0].id)
     })
+    const saved = localStorage.getItem('clienteSession')
+    if (saved) setCliente(JSON.parse(saved))
   }, [])
 
+  useEffect(() => {
+    if (cliente) {
+      setForm(f => ({ ...f, nombre: cliente.nombre, telefono: cliente.telefono ?? '' }))
+    }
+  }, [cliente])
+
   const filtrados = productos.filter(p => p.disponible && p.categoria_id === cat)
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError('')
+    setAuthLoading(true)
+    try {
+      const url = authMode === 'login' ? '/api/clientes/login' : '/api/clientes/register'
+      const body = authMode === 'login'
+        ? { email: authForm.email, password: authForm.password }
+        : { nombre: authForm.nombre, email: authForm.email, password: authForm.password, telefono: authForm.telefono }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error de autenticación')
+
+      localStorage.setItem('clienteSession', JSON.stringify(data.cliente))
+      setCliente(data.cliente)
+      setStep('datos')
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'Error de autenticación')
+    } finally {
+      setAuthLoading(false)
+    }
+  }
 
   const handleDatos = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,6 +91,12 @@ export default function LlevarPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const cerrarSesion = () => {
+    localStorage.removeItem('clienteSession')
+    setCliente(null)
+    setForm({ nombre: '', telefono: '', notas: '' })
   }
 
   if (step === 'confirmado') {
@@ -70,6 +120,73 @@ export default function LlevarPage() {
     )
   }
 
+  if (step === 'auth') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white border-b border-gray-100">
+          <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-3">
+            <button onClick={() => setStep('menu')} className="text-gray-400 hover:text-gray-900 text-sm font-medium">← Volver</button>
+            <span className="font-black text-lg">Tu cuenta</span>
+          </div>
+        </header>
+        <main className="max-w-sm mx-auto px-4 py-8">
+          <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
+            {(['login', 'register'] as const).map(m => (
+              <button key={m} onClick={() => { setAuthMode(m); setAuthError('') }}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${authMode === m ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>
+                {m === 'login' ? 'Iniciar sesión' : 'Registrarse'}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={handleAuth} className="space-y-4">
+            {authMode === 'register' && (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5 text-gray-500">Nombre *</label>
+                  <input type="text" required value={authForm.nombre}
+                    onChange={e => setAuthForm(f => ({ ...f, nombre: e.target.value }))}
+                    placeholder="Tu nombre"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5 text-gray-500">Teléfono</label>
+                  <input type="tel" value={authForm.telefono}
+                    onChange={e => setAuthForm(f => ({ ...f, telefono: e.target.value }))}
+                    placeholder="600 000 000"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
+                </div>
+              </>
+            )}
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 text-gray-500">Email *</label>
+              <input type="email" required value={authForm.email}
+                onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="correo@ejemplo.com"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 text-gray-500">Contraseña *</label>
+              <input type="password" required value={authForm.password}
+                onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))}
+                placeholder="••••••••"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
+            </div>
+            {authError && <p className="text-red-500 text-sm bg-red-50 rounded-xl px-4 py-3">{authError}</p>}
+            <button type="submit" disabled={authLoading}
+              className="w-full bg-accent text-white py-3.5 rounded-2xl font-bold hover:bg-accent-dark transition-colors disabled:opacity-50">
+              {authLoading ? 'Cargando...' : authMode === 'login' ? 'Entrar' : 'Crear cuenta'}
+            </button>
+          </form>
+
+          <button onClick={() => setStep('datos')} className="w-full mt-4 py-3 text-gray-400 text-sm font-medium">
+            Continuar sin cuenta →
+          </button>
+        </main>
+      </div>
+    )
+  }
+
   if (step === 'datos') {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -80,7 +197,6 @@ export default function LlevarPage() {
           </div>
         </header>
         <main className="max-w-lg mx-auto px-4 py-6">
-          {/* Resumen */}
           <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-6">
             <h2 className="font-bold mb-3 text-sm text-gray-500 uppercase tracking-wider">Resumen</h2>
             <ul className="space-y-2 mb-3">
@@ -166,6 +282,18 @@ export default function LlevarPage() {
               <Link href="/" className="text-gray-400 hover:text-gray-900 text-sm font-medium">← Inicio</Link>
               <span className="font-black text-lg">Para llevar 🛵</span>
             </div>
+            {cliente ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
+                  👤 {cliente.nombre}
+                </span>
+                <button onClick={cerrarSesion} className="text-xs text-gray-400 hover:text-gray-600">Salir</button>
+              </div>
+            ) : (
+              <button onClick={() => setStep('auth')} className="text-xs text-accent font-semibold">
+                Iniciar sesión
+              </button>
+            )}
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3">
             {categorias.map(c => (
@@ -186,7 +314,7 @@ export default function LlevarPage() {
 
       {count > 0 && (
         <button
-          onClick={() => setStep('datos')}
+          onClick={() => cliente ? setStep('datos') : setStep('auth')}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-accent text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 font-semibold hover:bg-accent-dark transition-colors"
         >
           <span className="bg-white text-accent text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{count}</span>
