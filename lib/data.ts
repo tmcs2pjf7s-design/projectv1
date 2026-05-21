@@ -4,30 +4,49 @@ import { Categoria, Producto, Pedido, Mesa, EstadoPedido, CartItem } from './typ
 
 export async function getCategorias(): Promise<Categoria[]> {
   if (!isConfigured()) return mockCategorias
-  const { data } = await supabase.from('categorias').select('*').order('orden')
-  return (data as Categoria[]) ?? mockCategorias
+  try {
+    const { data, error } = await supabase.from('categorias').select('*').order('orden')
+    if (error || !data?.length) return mockCategorias
+    return data as Categoria[]
+  } catch {
+    return mockCategorias
+  }
 }
 
 export async function getProductos(): Promise<Producto[]> {
   if (!isConfigured()) return mockProductos
-  const { data } = await supabase.from('productos').select('*').order('nombre')
-  return (data as Producto[]) ?? mockProductos
+  try {
+    const { data, error } = await supabase.from('productos').select('*').order('nombre')
+    if (error || !data?.length) return mockProductos
+    return data as Producto[]
+  } catch {
+    return mockProductos
+  }
 }
 
 export async function getMesas(): Promise<Mesa[]> {
   if (!isConfigured()) return mockMesas
-  const { data } = await supabase.from('mesas').select('*').order('numero')
-  return (data as Mesa[]) ?? mockMesas
+  try {
+    const { data, error } = await supabase.from('mesas').select('*').order('numero')
+    if (error || !data?.length) return mockMesas
+    return data as Mesa[]
+  } catch {
+    return mockMesas
+  }
 }
 
 export async function getPedidosActivos(): Promise<Pedido[]> {
   if (!isConfigured()) return mockPedidos
-  const { data } = await supabase
-    .from('pedidos')
-    .select('*, mesa:mesas(*), items:pedido_items(*, producto:productos(*))')
-    .not('estado', 'in', '("entregado","cancelado")')
-    .order('created_at', { ascending: true })
-  return (data as Pedido[]) ?? []
+  try {
+    const { data } = await supabase
+      .from('pedidos')
+      .select('*, mesa:mesas(*), items:pedido_items(*, producto:productos(*))')
+      .not('estado', 'in', '("entregado","cancelado")')
+      .order('created_at', { ascending: true })
+    return (data as Pedido[]) ?? []
+  } catch {
+    return []
+  }
 }
 
 export async function createPedido(
@@ -43,7 +62,14 @@ export async function createPedido(
 
   const { data: pedido, error } = await supabase
     .from('pedidos')
-    .insert({ tipo, total, mesa_id: opts.mesa_id ?? null, cliente_nombre: opts.cliente_nombre ?? null, cliente_telefono: opts.cliente_telefono ?? null, notas: opts.notas ?? null })
+    .insert({
+      tipo,
+      total,
+      mesa_id: opts.mesa_id ?? null,
+      cliente_nombre: opts.cliente_nombre ?? null,
+      cliente_telefono: opts.cliente_telefono ?? null,
+      notas: opts.notas ?? null,
+    })
     .select()
     .single()
 
