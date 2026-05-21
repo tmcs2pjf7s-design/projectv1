@@ -6,6 +6,9 @@ export const mockCategorias: Categoria[] = [
   { id: 'cat-3', nombre: 'Al Plato', orden: 3, icono: '🍽️' },
   { id: 'cat-4', nombre: 'Tapas Calientes', orden: 4, icono: '🍟' },
   { id: 'cat-5', nombre: 'Platos Combinados', orden: 5, icono: '🥗' },
+  { id: 'cat-6', nombre: 'Bebidas', orden: 6, icono: '🥤' },
+  { id: 'cat-7', nombre: 'Copas y Licores', orden: 7, icono: '🍸' },
+  { id: 'cat-8', nombre: 'Vinos y Vermut', orden: 8, icono: '🍷' },
 ]
 
 const vf = (v: number, f: number) => [
@@ -292,6 +295,160 @@ export const mockProductos: Producto[] = [
     id: 'p-77', categoria_id: 'cat-5', nombre: 'Combinado Infantil',
     descripcion: 'Patatas fritas, huevo y Frankfurt / Lomo / Hamburguesa · 🕐 12h–16h',
     precio: 11.50, disponible: true, tiempo_prep: 12,
+  },
+
+  // ── BEBIDAS ─────────────────────────────────────────────────
+  {
+    id: 'p-80', categoria_id: 'cat-6', nombre: 'Coca Cola',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-81', categoria_id: 'cat-6', nombre: 'Coca Cola 0',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-82', categoria_id: 'cat-6', nombre: 'Fanta Naranja',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-83', categoria_id: 'cat-6', nombre: 'Fanta Limón',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-84', categoria_id: 'cat-6', nombre: 'Aquarius Naranja',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-85', categoria_id: 'cat-6', nombre: 'Aquarius Limón',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-86', categoria_id: 'cat-6', nombre: 'Trina Naranja',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-87', categoria_id: 'cat-6', nombre: 'Nestea',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-88', categoria_id: 'cat-6', nombre: 'Tónica',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-89', categoria_id: 'cat-6', nombre: 'Beter Kas',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-90', categoria_id: 'cat-6', nombre: 'Vichy Catalán',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-91', categoria_id: 'cat-6', nombre: 'Zumo Naranja Natural',
+    descripcion: 'Exprimido al momento', precio: 3.15, disponible: true, tiempo_prep: 3,
+  },
+  {
+    id: 'p-92', categoria_id: 'cat-6', nombre: 'Zumo Naranja',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-93', categoria_id: 'cat-6', nombre: 'Zumo Melocotón',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-94', categoria_id: 'cat-6', nombre: 'Zumo Piña',
+    descripcion: '', precio: 2.35, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-95', categoria_id: 'cat-6', nombre: 'Agua 1/2',
+    descripcion: '', precio: 2.55, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-96', categoria_id: 'cat-6', nombre: 'Agua 1/4',
+    descripcion: '', precio: 1.45, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-97', categoria_id: 'cat-6', nombre: 'Tinto Verano',
+    descripcion: '', precio: 5.65, disponible: true, tiempo_prep: 2,
+  },
+
+  // ── COPAS Y LICORES ─────────────────────────────────────────
+  {
+    id: 'p-100', categoria_id: 'cat-7', nombre: 'Gin Tonic Puerto de India',
+    descripcion: '', precio: 7.50, disponible: true, tiempo_prep: 3,
+  },
+  {
+    id: 'p-101', categoria_id: 'cat-7', nombre: 'Gin Tonic Bombay',
+    descripcion: '', precio: 8.50, disponible: true, tiempo_prep: 3,
+  },
+  {
+    id: 'p-102', categoria_id: 'cat-7', nombre: 'Gin Tonic Beefeater',
+    descripcion: '', precio: 7.50, disponible: true, tiempo_prep: 3,
+  },
+  {
+    id: 'p-103', categoria_id: 'cat-7', nombre: 'Gin Tonic Seagrams',
+    descripcion: '', precio: 7.50, disponible: true, tiempo_prep: 3,
+  },
+  {
+    id: 'p-104', categoria_id: 'cat-7', nombre: 'Tubo Baileys',
+    descripcion: '', precio: 6.50, disponible: true, tiempo_prep: 2,
+  },
+  {
+    id: 'p-105', categoria_id: 'cat-7', nombre: 'Tubo Crema Orujo',
+    descripcion: '', precio: 6.00, disponible: true, tiempo_prep: 2,
+  },
+  {
+    id: 'p-106', categoria_id: 'cat-7', nombre: 'Tubo Orujo de Hierba',
+    descripcion: '', precio: 6.00, disponible: true, tiempo_prep: 2,
+  },
+  {
+    id: 'p-107', categoria_id: 'cat-7', nombre: 'Tubo Limoncello',
+    descripcion: '', precio: 5.50, disponible: true, tiempo_prep: 2,
+  },
+  {
+    id: 'p-108', categoria_id: 'cat-7', nombre: 'Tubo Marie Brizard',
+    descripcion: '', precio: 3.75, disponible: true, tiempo_prep: 2,
+  },
+  {
+    id: 'p-109', categoria_id: 'cat-7', nombre: 'Tubo Pacharán',
+    descripcion: '', precio: 3.75, disponible: true, tiempo_prep: 2,
+  },
+  {
+    id: 'p-110', categoria_id: 'cat-7', nombre: 'Chupito Limoncello',
+    descripcion: '', precio: 2.50, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-111', categoria_id: 'cat-7', nombre: 'Chupito Orujo',
+    descripcion: '', precio: 2.50, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-112', categoria_id: 'cat-7', nombre: 'Chupito Crema',
+    descripcion: '', precio: 2.70, disponible: true, tiempo_prep: 1,
+  },
+
+  // ── VINOS Y VERMUT ──────────────────────────────────────────
+  {
+    id: 'p-120', categoria_id: 'cat-8', nombre: 'Copa Vino Blanco',
+    descripcion: '', precio: 3.05, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-121', categoria_id: 'cat-8', nombre: 'Copa Vino Tinto',
+    descripcion: '', precio: 3.05, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-122', categoria_id: 'cat-8', nombre: 'Copa Vino Rosado',
+    descripcion: '', precio: 3.05, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-123', categoria_id: 'cat-8', nombre: 'Martini Blanco',
+    descripcion: '', precio: 3.95, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-124', categoria_id: 'cat-8', nombre: 'Martini Negro',
+    descripcion: '', precio: 3.95, disponible: true, tiempo_prep: 1,
+  },
+  {
+    id: 'p-125', categoria_id: 'cat-8', nombre: 'Vermut Casero',
+    descripcion: '', precio: 3.95, disponible: true, tiempo_prep: 1,
   },
 ]
 
