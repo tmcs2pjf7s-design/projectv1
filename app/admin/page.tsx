@@ -1,8 +1,18 @@
 'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { mockPedidos, mockMesas, mockProductos } from '@/lib/mockData'
+import { useAuth } from '@/context/AuthContext'
+import AdminGuard from '@/components/AdminGuard'
 
-export default function AdminPage() {
+function AdminContent() {
+  const { user, signOut } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await signOut()
+    router.replace('/admin/login')
+  }
   const hoy = mockPedidos.filter(p => p.estado !== 'cancelado')
   const ingresos = hoy.reduce((s, p) => s + p.total, 0)
   const mesasOcupadas = mockMesas.filter(m => m.estado === 'ocupada').length
@@ -23,13 +33,19 @@ export default function AdminPage() {
             <Link href="/" className="text-gray-400 text-sm font-medium">← Inicio</Link>
             <span className="font-black text-xl">⚙️ Admin</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Link href="/cocina" className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors">
               👨‍🍳 Cocina
             </Link>
             <Link href="/comandero" className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-medium hover:bg-gray-200 transition-colors">
               🧑‍💼 Comandero
             </Link>
+            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
+              <span className="text-xs text-gray-400 hidden sm:block">{user?.email}</span>
+              <button onClick={handleLogout} className="text-sm bg-red-50 text-red-600 px-3 py-2 rounded-xl font-medium hover:bg-red-100 transition-colors">
+                Salir
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -111,4 +127,8 @@ export default function AdminPage() {
       </main>
     </div>
   )
+}
+
+export default function AdminPage() {
+  return <AdminGuard><AdminContent /></AdminGuard>
 }

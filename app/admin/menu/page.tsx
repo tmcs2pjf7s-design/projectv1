@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getCategorias, getProductos, upsertProducto, deleteProducto } from '@/lib/data'
 import { Categoria, Producto } from '@/lib/types'
+import AdminGuard from '@/components/AdminGuard'
 
 const emptyForm = (cats: Categoria[]): Omit<Producto, 'id'> => ({
   categoria_id: cats[0]?.id ?? '',
@@ -10,7 +11,7 @@ const emptyForm = (cats: Categoria[]): Omit<Producto, 'id'> => ({
   imagen: '', disponible: true, tiempo_prep: 10, variantes: undefined,
 })
 
-export default function AdminMenuPage() {
+function AdminMenuContent() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [productos, setProductos] = useState<Producto[]>([])
   const [catFiltro, setCatFiltro] = useState('todos')
@@ -180,4 +181,8 @@ export default function AdminMenuPage() {
       </main>
     </div>
   )
+}
+
+export default function AdminMenuPage() {
+  return <AdminGuard><AdminMenuContent /></AdminGuard>
 }
