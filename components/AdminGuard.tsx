@@ -1,17 +1,20 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/context/AuthContext'
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { isAdmin, loading } = useAuth()
+  const [checked, setChecked] = useState(false)
+  const [ok, setOk] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !isAdmin) router.replace('/admin/login')
-  }, [isAdmin, loading, router])
+    const session = localStorage.getItem('adminSession')
+    if (session) setOk(true)
+    else router.replace('/admin/login')
+    setChecked(true)
+  }, [router])
 
-  if (loading) {
+  if (!checked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-gray-400 text-sm">Verificando acceso...</div>
@@ -19,7 +22,6 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     )
   }
 
-  if (!isAdmin) return null
-
+  if (!ok) return null
   return <>{children}</>
 }

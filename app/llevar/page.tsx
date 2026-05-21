@@ -5,9 +5,8 @@ import { getCategorias, getProductos, createPedido } from '@/lib/data'
 import { Categoria, Producto } from '@/lib/types'
 import MenuCard from '@/components/MenuCard'
 import { useCart } from '@/context/CartContext'
-import { useAuth } from '@/context/AuthContext'
 
-type Step = 'menu' | 'auth' | 'datos' | 'confirmado'
+type Step = 'menu' | 'datos' | 'confirmado'
 
 export default function LlevarPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
@@ -18,13 +17,8 @@ export default function LlevarPage() {
   const [numPedido, setNumPedido] = useState(0)
   const [pago, setPago] = useState<'bar' | 'online'>('bar')
   const [form, setForm] = useState({ nombre: '', telefono: '', notas: '' })
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
-  const [authForm, setAuthForm] = useState({ email: '', password: '', nombre: '' })
-  const [authError, setAuthError] = useState('')
-  const [authLoading, setAuthLoading] = useState(false)
 
   const { clearCart, total, count, items } = useCart()
-  const { user, signIn, signUp } = useAuth()
 
   useEffect(() => {
     Promise.all([getCategorias(), getProductos()]).then(([cats, prods]) => {
@@ -34,33 +28,7 @@ export default function LlevarPage() {
     })
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      const nombre = user.user_metadata?.nombre ?? ''
-      const email = user.email ?? ''
-      setForm(f => ({ ...f, nombre: nombre || email }))
-    }
-  }, [user])
-
   const filtrados = productos.filter(p => p.disponible && p.categoria_id === cat)
-
-  const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAuthError('')
-    setAuthLoading(true)
-    try {
-      if (authMode === 'login') {
-        await signIn(authForm.email, authForm.password)
-      } else {
-        await signUp(authForm.email, authForm.password, authForm.nombre)
-      }
-      setStep('datos')
-    } catch (err: unknown) {
-      setAuthError(err instanceof Error ? err.message : 'Error de autenticación')
-    } finally {
-      setAuthLoading(false)
-    }
-  }
 
   const handleDatos = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,64 +66,6 @@ export default function LlevarPage() {
           Te avisaremos al teléfono <strong>{form.telefono}</strong> cuando esté listo.
         </p>
         <Link href="/" className="mt-8 text-accent font-semibold text-sm">← Volver al inicio</Link>
-      </div>
-    )
-  }
-
-  if (step === 'auth') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b border-gray-100">
-          <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-3">
-            <button onClick={() => setStep('menu')} className="text-gray-400 hover:text-gray-900 text-sm font-medium">← Volver</button>
-            <span className="font-black text-lg">Tu cuenta</span>
-          </div>
-        </header>
-        <main className="max-w-sm mx-auto px-4 py-8">
-          <div className="flex bg-gray-100 rounded-2xl p-1 mb-6">
-            {(['login', 'register'] as const).map(m => (
-              <button key={m} onClick={() => setAuthMode(m)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${authMode === m ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>
-                {m === 'login' ? 'Iniciar sesión' : 'Registrarse'}
-              </button>
-            ))}
-          </div>
-
-          <form onSubmit={handleAuthSubmit} className="space-y-4">
-            {authMode === 'register' && (
-              <div>
-                <label className="block text-xs font-semibold mb-1.5 text-gray-500">Nombre</label>
-                <input type="text" required value={authForm.nombre}
-                  onChange={e => setAuthForm(f => ({ ...f, nombre: e.target.value }))}
-                  placeholder="Tu nombre"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
-              </div>
-            )}
-            <div>
-              <label className="block text-xs font-semibold mb-1.5 text-gray-500">Email</label>
-              <input type="email" required value={authForm.email}
-                onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))}
-                placeholder="correo@ejemplo.com"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold mb-1.5 text-gray-500">Contraseña</label>
-              <input type="password" required value={authForm.password}
-                onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))}
-                placeholder="••••••••"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
-            </div>
-            {authError && <p className="text-red-500 text-sm bg-red-50 rounded-xl px-4 py-3">{authError}</p>}
-            <button type="submit" disabled={authLoading}
-              className="w-full bg-accent text-white py-3.5 rounded-2xl font-bold hover:bg-accent-dark transition-colors disabled:opacity-50">
-              {authLoading ? 'Cargando...' : authMode === 'login' ? 'Entrar' : 'Crear cuenta'}
-            </button>
-          </form>
-
-          <button onClick={() => setStep('datos')} className="w-full mt-4 py-3 text-gray-400 text-sm font-medium">
-            Continuar sin cuenta →
-          </button>
-        </main>
       </div>
     )
   }
@@ -216,7 +126,6 @@ export default function LlevarPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent resize-none" />
             </div>
 
-            {/* Método de pago */}
             <div>
               <label className="block text-xs font-semibold mb-2 text-gray-500">Método de pago</label>
               <div className="grid grid-cols-2 gap-3">
@@ -257,15 +166,6 @@ export default function LlevarPage() {
               <Link href="/" className="text-gray-400 hover:text-gray-900 text-sm font-medium">← Inicio</Link>
               <span className="font-black text-lg">Para llevar 🛵</span>
             </div>
-            {user ? (
-              <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
-                👤 {user.user_metadata?.nombre || user.email}
-              </span>
-            ) : (
-              <button onClick={() => setStep('auth')} className="text-xs text-accent font-semibold">
-                Iniciar sesión
-              </button>
-            )}
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3">
             {categorias.map(c => (
@@ -286,7 +186,7 @@ export default function LlevarPage() {
 
       {count > 0 && (
         <button
-          onClick={() => user ? setStep('datos') : setStep('auth')}
+          onClick={() => setStep('datos')}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-accent text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 font-semibold hover:bg-accent-dark transition-colors"
         >
           <span className="bg-white text-accent text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{count}</span>

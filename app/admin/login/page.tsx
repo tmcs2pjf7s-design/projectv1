@@ -1,26 +1,27 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/context/AuthContext'
 
 export default function AdminLoginPage() {
-  const { signIn, isAdmin, loading } = useAuth()
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    if (!loading && isAdmin) router.replace('/admin')
-  }, [isAdmin, loading, router])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSubmitting(true)
     try {
-      await signIn(email, password)
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Credenciales incorrectas')
+      localStorage.setItem('adminSession', data.email)
       router.replace('/admin')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Credenciales incorrectas')

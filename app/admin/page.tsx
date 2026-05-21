@@ -1,18 +1,23 @@
 'use client'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { mockPedidos, mockMesas, mockProductos } from '@/lib/mockData'
-import { useAuth } from '@/context/AuthContext'
 import AdminGuard from '@/components/AdminGuard'
 
 function AdminContent() {
-  const { user, signOut } = useAuth()
+  const [adminEmail, setAdminEmail] = useState('')
   const router = useRouter()
 
-  const handleLogout = async () => {
-    await signOut()
+  useEffect(() => {
+    setAdminEmail(localStorage.getItem('adminSession') ?? '')
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminSession')
     router.replace('/admin/login')
   }
+
   const hoy = mockPedidos.filter(p => p.estado !== 'cancelado')
   const ingresos = hoy.reduce((s, p) => s + p.total, 0)
   const mesasOcupadas = mockMesas.filter(m => m.estado === 'ocupada').length
@@ -41,7 +46,7 @@ function AdminContent() {
               🧑‍💼 Comandero
             </Link>
             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
-              <span className="text-xs text-gray-400 hidden sm:block">{user?.email}</span>
+              <span className="text-xs text-gray-400 hidden sm:block">{adminEmail}</span>
               <button onClick={handleLogout} className="text-sm bg-red-50 text-red-600 px-3 py-2 rounded-xl font-medium hover:bg-red-100 transition-colors">
                 Salir
               </button>
@@ -51,7 +56,6 @@ function AdminContent() {
       </header>
 
       <main className="max-w-5xl mx-auto px-5 py-8">
-        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {stats.map(s => (
             <div key={s.label} className={`rounded-2xl p-5 ${s.color.split(' ')[0]} border border-current/10`}>
@@ -62,23 +66,16 @@ function AdminContent() {
           ))}
         </div>
 
-        {/* Quick access */}
         <h2 className="font-black text-lg mb-4">Gestión</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-          <Link
-            href="/admin/menu"
-            className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4"
-          >
+          <Link href="/admin/menu" className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
             <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-2xl">🍽️</div>
             <div>
               <h3 className="font-bold">Gestión de Menú</h3>
               <p className="text-sm text-gray-500">{mockProductos.length} productos · Añadir, editar o desactivar</p>
             </div>
           </Link>
-          <Link
-            href="/admin/mesas"
-            className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4"
-          >
+          <Link href="/admin/mesas" className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl">🪑</div>
             <div>
               <h3 className="font-bold">Gestión de Mesas</h3>
@@ -87,7 +84,6 @@ function AdminContent() {
           </Link>
         </div>
 
-        {/* Recent orders */}
         <h2 className="font-black text-lg mb-4">Pedidos recientes</h2>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
