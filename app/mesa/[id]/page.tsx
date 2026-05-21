@@ -1,28 +1,46 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { mockCategorias, mockProductos } from '@/lib/mockData'
+import { getCategorias, getProductos, createPedido } from '@/lib/data'
+import { Categoria, Producto } from '@/lib/types'
 import MenuCard from '@/components/MenuCard'
 import Carrito from '@/components/Carrito'
 import { useCart } from '@/context/CartContext'
 
 export default function MesaPage() {
   const { id } = useParams()
-  const mesaNum = String(id).replace('mesa-', '')
-  const [cat, setCat] = useState(mockCategorias[0].id)
+  const mesaId = String(id)
+  const mesaNum = mesaId.replace('mesa-', '')
+  const [categorias, setCategorias] = useState<Categoria[]>([])
+  const [productos, setProductos] = useState<Producto[]>([])
+  const [cat, setCat] = useState('')
   const [confirmado, setConfirmado] = useState(false)
-  const [numPedido] = useState(() => Math.floor(Math.random() * 900) + 100)
+  const [numPedido, setNumPedido] = useState(0)
   const [loading, setLoading] = useState(false)
-  const { clearCart } = useCart()
+  const { clearCart, items } = useCart()
 
-  const productos = mockProductos.filter(p => p.disponible && p.categoria_id === cat)
+  useEffect(() => {
+    Promise.all([getCategorias(), getProductos()]).then(([cats, prods]) => {
+      setCategorias(cats)
+      setProductos(prods)
+      if (cats.length) setCat(cats[0].id)
+    })
+  }, [])
+
+  const filtrados = productos.filter(p => p.disponible && p.categoria_id === cat)
 
   const handleConfirmar = async (notas: string) => {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1200))
-    clearCart()
-    setLoading(false)
-    setConfirmado(true)
+    try {
+      const num = await createPedido('mesa', items, { mesa_id: mesaId, notas })
+      setNumPedido(num)
+      clearCart()
+      setConfirmado(true)
+    } catch {
+      alert('Error al enviar el pedido. Inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (confirmado) {
@@ -38,10 +56,7 @@ export default function MesaPage() {
         <p className="text-gray-400 text-sm max-w-xs leading-relaxed">
           Tu pedido está siendo preparado. El camarero te lo traerá en cuanto esté listo.
         </p>
-        <button
-          onClick={() => setConfirmado(false)}
-          className="mt-8 text-accent font-semibold text-sm"
-        >
+        <button onClick={() => setConfirmado(false)} className="mt-8 text-accent font-semibold text-sm">
           + Añadir más productos
         </button>
       </div>
@@ -57,34 +72,24 @@ export default function MesaPage() {
               <span className="font-black text-lg">Frankfurt Els Tr3s</span>
               <span className="ml-2 text-sm text-gray-400 font-medium">Mesa {mesaNum}</span>
             </div>
-            <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
-              🟢 Abierto
-            </span>
+            <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">🟢 Abierto</span>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3">
-            {mockCategorias.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setCat(c.id)}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-semibold transition-colors ${
-                  cat === c.id ? 'bg-accent text-white' : 'bg-gray-100 text-gray-600'
-                }`}
-              >
+            {categorias.map(c => (
+              <button key={c.id} onClick={() => setCat(c.id)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm font-semibold transition-colors ${cat === c.id ? 'bg-accent text-white' : 'bg-gray-100 text-gray-600'}`}>
                 {c.icono} {c.nombre}
               </button>
             ))}
           </div>
         </div>
       </header>
-
       <main className="max-w-2xl mx-auto px-4 py-4">
+        {filtrados.length === 0 && <p className="text-center text-gray-400 py-12">Cargando...</p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {productos.map(p => (
-            <MenuCard key={p.id} producto={p} />
-          ))}
+          {filtrados.map(p => <MenuCard key={p.id} producto={p} />)}
         </div>
       </main>
-
       <Carrito onConfirmar={handleConfirmar} loading={loading} />
     </div>
   )
