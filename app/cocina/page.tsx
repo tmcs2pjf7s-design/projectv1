@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { getPedidosActivos, updateEstadoPedido } from '@/lib/data'
+import { useState, useEffect, useRef } from 'react'
+import { getPedidosActivos, updateEstadoPedido, getImpresoras } from '@/lib/data'
 import { supabase, isConfigured } from '@/lib/supabase'
-import { Pedido, EstadoPedido } from '@/lib/types'
+import { Pedido, EstadoPedido, Impresora } from '@/lib/types'
+import { imprimirPedido } from '@/lib/print'
 import PedidoCard from '@/components/PedidoCard'
 
 const COLUMNAS: { estado: EstadoPedido; label: string; color: string }[] = [
@@ -14,20 +15,38 @@ const COLUMNAS: { estado: EstadoPedido; label: string; color: string }[] = [
 export default function CocinaPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [hora, setHora] = useState(new Date())
+  const [impresoras, setImpresoras] = useState<Impresora[]>([])
+  const idsConocidos = useRef<Set<string>>(new Set())
+  const iniciado = useRef(false)
 
   useEffect(() => {
-    getPedidosActivos().then(setPedidos)
+    getImpresoras().then(setImpresoras)
+
+    getPedidosActivos().then(ps => {
+      setPedidos(ps)
+      ps.forEach(p => idsConocidos.current.add(p.id))
+      iniciado.current = true
+    })
 
     if (isConfigured()) {
       const channel = supabase
         .channel('cocina-pedidos')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
-          getPedidosActivos().then(setPedidos)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, async () => {
+          const nuevos = await getPedidosActivos()
+          setPedidos(nuevos)
+          if (iniciado.current) {
+            for (const p of nuevos) {
+              if (!idsConocidos.current.has(p.id) && p.estado === 'pendiente') {
+                imprimirPedido(p, impresoras)
+              }
+              idsConocidos.current.add(p.id)
+            }
+          }
         })
         .subscribe()
       return () => { supabase.removeChannel(channel) }
     }
-  }, [])
+  }, [impresoras])
 
   useEffect(() => {
     const t = setInterval(() => setHora(new Date()), 1000)

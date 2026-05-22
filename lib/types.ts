@@ -69,3 +69,15 @@ export interface CartItem {
   variante?: Variante
   notas?: string
 }
+
+export type TipoImpresora = 'cocina' | 'barra' | 'ticket'
+
+export interface Impresora {
+  id: string
+  nombre: string
+  ip: string
+  puerto: number
+  tipo: TipoImpresora
+  activa: boolean
+  categorias_ids: string[]
+}

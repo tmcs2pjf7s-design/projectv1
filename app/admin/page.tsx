@@ -99,6 +99,13 @@ function AdminContent() {
               <p className="text-sm text-gray-500">{mockMesas.length} mesas · Configurar y generar QR</p>
             </div>
           </Link>
+          <Link href="/admin/impresoras" className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl">🖨️</div>
+            <div>
+              <h3 className="font-bold">Impresoras</h3>
+              <p className="text-sm text-gray-500">Conectar por WiFi · Cocina, barra, ticket</p>
+            </div>
+          </Link>
         </div>
 
         <h2 className="font-black text-lg mb-4">Pedidos recientes</h2>

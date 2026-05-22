@@ -1,6 +1,6 @@
 import { supabase, isConfigured } from './supabase'
 import { mockCategorias, mockProductos, mockPedidos, mockMesas } from './mockData'
-import { Categoria, Producto, Pedido, Mesa, EstadoPedido, CartItem } from './types'
+import { Categoria, Producto, Pedido, Mesa, EstadoPedido, CartItem, Impresora } from './types'
 
 export async function getCategorias(): Promise<Categoria[]> {
   if (!isConfigured()) return mockCategorias
@@ -106,4 +106,22 @@ export async function upsertProducto(p: Partial<Producto> & { nombre: string; pr
 export async function deleteProducto(id: string): Promise<void> {
   if (!isConfigured()) return
   await supabase.from('productos').delete().eq('id', id)
+}
+
+export async function getImpresoras(): Promise<Impresora[]> {
+  if (!isConfigured()) return []
+  try {
+    const { data } = await supabase.from('impresoras').select('*').order('created_at')
+    return (data as Impresora[]) ?? []
+  } catch { return [] }
+}
+
+export async function upsertImpresora(imp: Partial<Impresora> & { nombre: string; ip: string; tipo: string }): Promise<void> {
+  if (!isConfigured()) return
+  await supabase.from('impresoras').upsert(imp)
+}
+
+export async function deleteImpresora(id: string): Promise<void> {
+  if (!isConfigured()) return
+  await supabase.from('impresoras').delete().eq('id', id)
 }
