@@ -236,7 +236,7 @@ export async function testImpresora(imp: Impresora): Promise<boolean> {
   if (imp.protocolo === 'bixolon') {
     const enc = new TextEncoder()
     const text = enc.encode(`TEST - Frankfurt Els Tr3s\n${imp.nombre} (${imp.tipo})\nConexion OK\n\n\n`)
-    const escpos = new Uint8Array([0x1b, 0x40, ...text, 0x1d, 0x56, 0x42, 0x10])
+    const escpos = new Uint8Array([0x1b, 0x40, ...Array.from(text), 0x1d, 0x56, 0x42, 0x10])
     const ok = await printBixolon(imp, escpos)
     if (!ok) printVentana(`<div style="font-family:monospace;padding:12px;text-align:center">
       <b>⚠ BXLPrint Agent no detectado</b><br><br>
