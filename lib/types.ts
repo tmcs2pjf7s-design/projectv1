@@ -71,6 +71,7 @@ export interface CartItem {
 }
 
 export type TipoImpresora = 'cocina' | 'barra' | 'ticket'
+export type ProtocoloImpresora = 'bixolon' | 'epson' | 'ventana'
 
 export interface Impresora {
   id: string
@@ -78,6 +79,7 @@ export interface Impresora {
   ip: string
   puerto: number
   tipo: TipoImpresora
+  protocolo: ProtocoloImpresora
   activa: boolean
   categorias_ids: string[]
 }

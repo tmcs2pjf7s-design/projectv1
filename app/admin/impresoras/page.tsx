@@ -3,8 +3,32 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import AdminGuard from '@/components/AdminGuard'
 import { getImpresoras, upsertImpresora, deleteImpresora, getCategorias } from '@/lib/data'
-import { Impresora, Categoria, TipoImpresora } from '@/lib/types'
+import { Impresora, Categoria, TipoImpresora, ProtocoloImpresora } from '@/lib/types'
 import { testImpresora, printVentana, buildTicketHtml } from '@/lib/print'
+
+const PROTOCOLOS: { value: ProtocoloImpresora; label: string; icon: string; desc: string; setup: string }[] = [
+  {
+    value: 'bixolon',
+    label: 'Bixolon SRP',
+    icon: '🖨️',
+    desc: 'Bixolon SRP-350, SRP-380, SRP-Q300…',
+    setup: 'Requiere instalar BXLPrint Agent en el ordenador del local (descarga gratuita en bixolon.com).',
+  },
+  {
+    value: 'epson',
+    label: 'Epson TM',
+    icon: '🖨️',
+    desc: 'Epson TM-T20, TM-T88, TM-m30…',
+    setup: 'Conecta la impresora al WiFi. Introduce su IP (la encuentras en el menú de la impresora).',
+  },
+  {
+    value: 'ventana',
+    label: 'Cualquier impresora',
+    icon: '🖥️',
+    desc: 'Abre ventana de impresión del navegador',
+    setup: 'Funciona con cualquier impresora USB o de red configurada en el ordenador.',
+  },
+]
 
 const TIPOS: { value: TipoImpresora; label: string; icon: string; desc: string }[] = [
   { value: 'cocina',  label: 'Cocina',  icon: '👨‍🍳', desc: 'Imprime tickets de comida para la cocina' },
@@ -13,7 +37,7 @@ const TIPOS: { value: TipoImpresora; label: string; icon: string; desc: string }
 ]
 
 const emptyForm = (): Omit<Impresora, 'id'> => ({
-  nombre: '', ip: '', puerto: 8008, tipo: 'cocina', activa: true, categorias_ids: [],
+  nombre: '', ip: '', puerto: 9100, tipo: 'cocina', protocolo: 'bixolon', activa: true, categorias_ids: [],
 })
 
 function ImpresorasContent() {
@@ -99,20 +123,33 @@ function ImpresorasContent() {
       </header>
 
       <main className="max-w-4xl mx-auto px-5 py-6">
-        {/* Info box */}
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 text-sm text-blue-800">
-          <p className="font-semibold mb-1">📡 Cómo conectar una impresora</p>
-          <p className="text-blue-700 leading-relaxed">
-            Conecta la impresora al WiFi del local. Introduce su dirección IP (la encuentras en la configuración de la impresora o en el router). Puerto por defecto: <strong>8008</strong> para Epson TM, <strong>9100</strong> para otras.
-          </p>
-        </div>
-
         {/* Formulario */}
         {form && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6">
             <h3 className="font-bold mb-5">{editando ? 'Editar impresora' : 'Nueva impresora'}</h3>
 
-            {/* Tipo */}
+            {/* Protocolo/Driver */}
+            <div className="mb-5">
+              <label className="block text-xs font-semibold mb-2 text-gray-500">Tipo de impresora</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {PROTOCOLOS.map(p => (
+                  <button key={p.value} type="button"
+                    onClick={() => setForm(f => f && ({ ...f, protocolo: p.value, puerto: p.value === 'epson' ? 8008 : 9100 }))}
+                    className={`flex flex-col gap-1 p-3 rounded-2xl border-2 transition-all text-left ${form.protocolo === p.value ? 'border-accent bg-accent/5' : 'border-gray-200'}`}>
+                    <span className="text-xl">{p.icon}</span>
+                    <span className="text-sm font-bold">{p.label}</span>
+                    <span className="text-xs text-gray-400 leading-tight">{p.desc}</span>
+                  </button>
+                ))}
+              </div>
+              {form.protocolo && (
+                <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-800">
+                  ℹ️ {PROTOCOLOS.find(p => p.value === form.protocolo)?.setup}
+                </div>
+              )}
+            </div>
+
+            {/* Rol */}
             <div className="mb-4">
               <label className="block text-xs font-semibold mb-2 text-gray-500">Rol de la impresora</label>
               <div className="grid grid-cols-3 gap-3">
@@ -131,21 +168,27 @@ function ImpresorasContent() {
               <div>
                 <label className="block text-xs font-semibold mb-1 text-gray-500">Nombre *</label>
                 <input value={form.nombre} onChange={e => setForm(f => f && ({ ...f, nombre: e.target.value }))}
-                  placeholder="Ej: Epson Cocina"
+                  placeholder="Ej: Bixolon Cocina"
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent" />
               </div>
-              <div>
-                <label className="block text-xs font-semibold mb-1 text-gray-500">Dirección IP *</label>
-                <input value={form.ip} onChange={e => setForm(f => f && ({ ...f, ip: e.target.value }))}
-                  placeholder="192.168.1.100"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent font-mono" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold mb-1 text-gray-500">Puerto</label>
-                <input type="number" value={form.puerto}
-                  onChange={e => setForm(f => f && ({ ...f, puerto: parseInt(e.target.value) }))}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent font-mono" />
-              </div>
+              {form.protocolo !== 'ventana' && (
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-500">
+                    {form.protocolo === 'bixolon' ? 'IP de la impresora (opcional)' : 'Dirección IP *'}
+                  </label>
+                  <input value={form.ip} onChange={e => setForm(f => f && ({ ...f, ip: e.target.value }))}
+                    placeholder="192.168.1.100"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent font-mono" />
+                </div>
+              )}
+              {form.protocolo === 'epson' && (
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-500">Puerto (Epson: 8008)</label>
+                  <input type="number" value={form.puerto}
+                    onChange={e => setForm(f => f && ({ ...f, puerto: parseInt(e.target.value) }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent font-mono" />
+                </div>
+              )}
             </div>
 
             {/* Categorías asignadas */}
@@ -221,7 +264,10 @@ function ImpresorasContent() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-400 font-mono">{imp.ip}:{imp.puerto}</p>
+                        <p className="text-sm text-gray-400 font-mono">
+                          {imp.protocolo === 'ventana' ? 'Ventana del navegador' : `${imp.ip || 'USB'}:${imp.puerto}`}
+                          {' · '}<span className="not-italic">{PROTOCOLOS.find(p => p.value === imp.protocolo)?.label}</span>
+                        </p>
                         {cats.length > 0 && (
                           <div className="flex gap-1 mt-1 flex-wrap">
                             {cats.map(c => (
