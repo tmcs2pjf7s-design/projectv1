@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'ruslanurbano@outlook.es'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '.12//Musica'
+
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json()
-  const adminEmail = process.env.ADMIN_EMAIL
-  const adminPassword = process.env.ADMIN_PASSWORD
-
-  if (!adminEmail || !adminPassword) {
-    return NextResponse.json({ error: 'Admin no configurado' }, { status: 500 })
+  try {
+    const { email, password } = await req.json()
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      return NextResponse.json({ ok: true, email })
+    }
+    return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
+  } catch {
+    return NextResponse.json({ error: 'Petición inválida' }, { status: 400 })
   }
-
-  if (email === adminEmail && password === adminPassword) {
-    return NextResponse.json({ ok: true, email })
-  }
-
-  return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
 }
