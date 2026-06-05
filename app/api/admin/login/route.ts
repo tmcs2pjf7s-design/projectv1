@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { hashPassword, verifyPassword } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { pool } from '@/lib/db'
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'ruslanurbano@outlook.es'
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '.12//Musica'
@@ -8,37 +8,35 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '.12//Musica'
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json()
-
     if (email !== ADMIN_EMAIL) {
       return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
     }
 
-    // Buscar admin en la BD
-    const { data: usuario } = await supabase
-      .from('usuarios')
-      .select('id, password_hash, salt')
-      .eq('email', ADMIN_EMAIL)
-      .eq('rol', 'admin')
-      .maybeSingle()
-
-    if (usuario) {
-      // Verificar contra la BD
-      if (!verifyPassword(password, usuario.password_hash, usuario.salt)) {
-        return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
+    try {
+      const { rows } = await pool.query(
+        'SELECT password_hash, salt FROM usuarios WHERE email=$1 AND rol=$2',
+        [ADMIN_EMAIL, 'admin']
+      )
+      if (rows.length > 0) {
+        if (!verifyPassword(password, rows[0].password_hash, rows[0].salt)) {
+          return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
+        }
+      } else {
+        if (password !== ADMIN_PASSWORD) {
+          return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
+        }
+        const { hash, salt } = hashPassword(password)
+        await pool.query(
+          `INSERT INTO usuarios (nombre, email, password_hash, salt, rol)
+           VALUES ('Admin',$1,$2,$3,'admin')`,
+          [ADMIN_EMAIL, hash, salt]
+        )
       }
-    } else {
-      // Primera vez: verificar contra credenciales hardcoded y crear en BD
+    } catch {
+      // DB not ready yet — fall back to hardcoded check
       if (password !== ADMIN_PASSWORD) {
         return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
       }
-      const { hash, salt } = hashPassword(password)
-      await supabase.from('usuarios').insert({
-        nombre: 'Admin',
-        email: ADMIN_EMAIL,
-        password_hash: hash,
-        salt,
-        rol: 'admin',
-      })
     }
 
     return NextResponse.json({ ok: true, email })

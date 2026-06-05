@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { pool } from '@/lib/db'
+
+export async function GET() {
+  try {
+    const { rows } = await pool.query(`
+      SELECT p.*,
+        json_build_object('id', m.id, 'numero', m.numero, 'capacidad', m.capacidad, 'estado', m.estado) AS mesa,
+        json_agg(
+          json_build_object(
+            'id', pi.id, 'pedido_id', pi.pedido_id, 'producto_id', pi.producto_id,
+            'cantidad', pi.cantidad, 'precio', pi.precio, 'notas', pi.notas,
+            'producto', json_build_object(
+              'id', pr.id, 'nombre', pr.nombre, 'categoria_id', pr.categoria_id,
+              'precio', pr.precio, 'variantes', pr.variantes
+            )
+          ) ORDER BY pi.created_at
+        ) AS items
+      FROM pedidos p
+      LEFT JOIN mesas m ON p.mesa_id = m.id
+      LEFT JOIN pedido_items pi ON pi.pedido_id = p.id
+      LEFT JOIN productos pr ON pi.producto_id = pr.id
+      WHERE p.estado NOT IN ('entregado','cancelado')
+      GROUP BY p.id, m.id
+      ORDER BY p.created_at ASC
+    `)
+    return NextResponse.json(rows.map(r => ({
+      ...r,
+      mesa: r.mesa?.id ? r.mesa : undefined,
+      items: r.items?.filter((i: any) => i.id !== null) ?? [],
+    })))
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json([], { status: 500 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const client = await pool.connect()
+  try {
+    const { tipo, total, items, mesa_id, cliente_nombre, cliente_telefono, notas } = await req.json()
+    await client.query('BEGIN')
+    const { rows } = await client.query(
+      `INSERT INTO pedidos (tipo, total, mesa_id, cliente_nombre, cliente_telefono, notas)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, numero_orden`,
+      [tipo, total, mesa_id ?? null, cliente_nombre ?? null, cliente_telefono ?? null, notas ?? null]
+    )
+    const pedido = rows[0]
+    for (const item of items) {
+      await client.query(
+        `INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio, notas)
+         VALUES ($1,$2,$3,$4,$5)`,
+        [pedido.id, item.producto.id, item.cantidad,
+         item.variante?.precio ?? item.producto.precio, item.variante?.nombre ?? null]
+      )
+    }
+    await client.query('COMMIT')
+    return NextResponse.json({ numero_orden: pedido.numero_orden })
+  } catch (e) {
+    await client.query('ROLLBACK')
+    console.error(e)
+    return NextResponse.json({ error: 'Error al crear pedido' }, { status: 500 })
+  } finally {
+    client.release()
+  }
+}

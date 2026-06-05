@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { getPedidosActivos, updateEstadoPedido, getImpresoras } from '@/lib/data'
-import { supabase, isConfigured } from '@/lib/supabase'
 import { Pedido, EstadoPedido, Impresora } from '@/lib/types'
 import { imprimirPedido } from '@/lib/print'
 import PedidoCard from '@/components/PedidoCard'
@@ -52,26 +51,21 @@ export default function CocinaPage() {
       setLoading(false)
     })
 
-    if (!isConfigured()) return
-
-    const ch = supabase
-      .channel('cocina-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, async () => {
-        const nuevos = await getPedidosActivos()
-        setPedidos(nuevos)
-        if (iniciado.current) {
-          for (const p of nuevos) {
-            if (!idsConocidos.current.has(p.id) && p.estado === 'pendiente') {
-              beep()
-              imprimirPedido(p, impresorasRef.current)
-            }
-            idsConocidos.current.add(p.id)
+    const interval = setInterval(async () => {
+      const nuevos = await getPedidosActivos()
+      setPedidos(nuevos)
+      if (iniciado.current) {
+        for (const p of nuevos) {
+          if (!idsConocidos.current.has(p.id) && p.estado === 'pendiente') {
+            beep()
+            imprimirPedido(p, impresorasRef.current)
           }
+          idsConocidos.current.add(p.id)
         }
-      })
-      .subscribe()
+      }
+    }, 3000)
 
-    return () => { supabase.removeChannel(ch) }
+    return () => clearInterval(interval)
   }, [cargar])
 
   useEffect(() => {

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { getMesas, getPedidosActivos, getCategorias, getProductos, createPedido, updateEstadoPedido } from '@/lib/data'
-import { supabase, isConfigured } from '@/lib/supabase'
+
 import { Mesa, Pedido, EstadoPedido, Categoria, Producto } from '@/lib/types'
 import PedidoCard from '@/components/PedidoCard'
 
@@ -35,12 +35,8 @@ export default function ComanderoPage() {
         if (cats.length) setCat(cats[0].id)
       })
 
-    if (!isConfigured()) return
-    const ch = supabase
-      .channel('comandero-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, cargarPedidos)
-      .subscribe()
-    return () => { supabase.removeChannel(ch) }
+    const interval = setInterval(cargarPedidos, 5000)
+    return () => clearInterval(interval)
   }, [cargarPedidos])
 
   useEffect(() => {
