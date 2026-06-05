@@ -6,8 +6,8 @@ export async function getCategorias(): Promise<Categoria[]> {
   if (!isConfigured()) return mockCategorias
   try {
     const { data, error } = await supabase.from('categorias').select('*').order('orden')
-    if (error || !data?.length) return mockCategorias
-    return data as Categoria[]
+    if (error) return mockCategorias
+    return (data as Categoria[]) ?? mockCategorias
   } catch {
     return mockCategorias
   }
@@ -17,8 +17,8 @@ export async function getProductos(): Promise<Producto[]> {
   if (!isConfigured()) return mockProductos
   try {
     const { data, error } = await supabase.from('productos').select('*').order('nombre')
-    if (error || !data?.length) return mockProductos
-    return data as Producto[]
+    if (error) return mockProductos
+    return (data as Producto[]) ?? mockProductos
   } catch {
     return mockProductos
   }
@@ -28,8 +28,8 @@ export async function getMesas(): Promise<Mesa[]> {
   if (!isConfigured()) return mockMesas
   try {
     const { data, error } = await supabase.from('mesas').select('*').order('numero')
-    if (error || !data?.length) return mockMesas
-    return data as Mesa[]
+    if (error) return mockMesas
+    return (data as Mesa[]) ?? mockMesas
   } catch {
     return mockMesas
   }

@@ -1,16 +1,18 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { getCategorias, getProductos, createPedido } from '@/lib/data'
-import { Categoria, Producto } from '@/lib/types'
+import { getCategorias, getProductos, getMesas, createPedido } from '@/lib/data'
+import { Categoria, Producto, Mesa } from '@/lib/types'
 import MenuCard from '@/components/MenuCard'
 import Carrito from '@/components/Carrito'
 import { useCart } from '@/context/CartContext'
 
 export default function MesaPage() {
-  const { id } = useParams()
-  const mesaId = String(id)
-  const mesaNum = mesaId.replace('mesa-', '')
+  const params = useParams()
+  const rawId = params.id
+  const mesaId = Array.isArray(rawId) ? rawId[0] : String(rawId ?? '')
+
+  const [mesa, setMesa] = useState<Mesa | null>(null)
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [productos, setProductos] = useState<Producto[]>([])
   const [cat, setCat] = useState('')
@@ -20,12 +22,14 @@ export default function MesaPage() {
   const { clearCart, items } = useCart()
 
   useEffect(() => {
-    Promise.all([getCategorias(), getProductos()]).then(([cats, prods]) => {
+    Promise.all([getCategorias(), getProductos(), getMesas()]).then(([cats, prods, mesas]) => {
       setCategorias(cats)
       setProductos(prods)
       if (cats.length) setCat(cats[0].id)
+      const m = mesas.find(m => m.id === mesaId)
+      if (m) setMesa(m)
     })
-  }, [])
+  }, [mesaId])
 
   const filtrados = productos.filter(p => p.disponible && p.categoria_id === cat)
 
@@ -48,7 +52,7 @@ export default function MesaPage() {
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-4xl mb-6">✅</div>
         <h1 className="text-2xl font-black mb-1">¡Pedido enviado!</h1>
-        <p className="text-gray-500 mb-4">Mesa {mesaNum}</p>
+        <p className="text-gray-500 mb-4">Mesa {mesa?.numero ?? mesaId}</p>
         <div className="bg-accent/10 rounded-2xl px-10 py-5 mb-6">
           <p className="text-sm text-gray-500 mb-1">Número de pedido</p>
           <p className="text-5xl font-black text-accent">#{numPedido}</p>
@@ -70,7 +74,7 @@ export default function MesaPage() {
           <div className="h-14 flex items-center justify-between">
             <div>
               <span className="font-black text-lg">Frankfurt Els Tr3s</span>
-              <span className="ml-2 text-sm text-gray-400 font-medium">Mesa {mesaNum}</span>
+              {mesa && <span className="ml-2 text-sm text-gray-400 font-medium">Mesa {mesa.numero}</span>}
             </div>
             <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">🟢 Abierto</span>
           </div>
@@ -84,12 +88,22 @@ export default function MesaPage() {
           </div>
         </div>
       </header>
-      <main className="max-w-2xl mx-auto px-4 py-4">
-        {filtrados.length === 0 && <p className="text-center text-gray-400 py-12">Cargando...</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+      <main className="max-w-2xl mx-auto px-4 py-3">
+        {cat === '' && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            <p className="text-gray-400 text-sm">Cargando carta...</p>
+          </div>
+        )}
+        {cat !== '' && filtrados.length === 0 && (
+          <p className="text-center text-gray-400 py-12 text-sm">Sin productos en esta categoría</p>
+        )}
+        <div className="space-y-2">
           {filtrados.map(p => <MenuCard key={p.id} producto={p} />)}
         </div>
       </main>
+
       <Carrito onConfirmar={handleConfirmar} loading={loading} />
     </div>
   )
