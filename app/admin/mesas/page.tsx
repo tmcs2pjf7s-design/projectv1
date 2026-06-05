@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { mockMesas } from '@/lib/mockData'
 import { Mesa } from '@/lib/types'
-import { QRCodeSVG } from 'qrcode.react'
 
 export default function AdminMesasPage() {
   const [mesas, setMesas] = useState<Mesa[]>(mockMesas)
@@ -22,17 +21,15 @@ export default function AdminMesasPage() {
     ))
   }
 
+  const qrUrl = (url: string) =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(url)}&bgcolor=f9fafb&color=111827`
+
   const descargarQR = (mesa: Mesa) => {
-    const svg = document.getElementById(`qr-${mesa.id}`)
-    if (!svg) return
-    const svgData = new XMLSerializer().serializeToString(svg)
-    const blob = new Blob([svgData], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
-    a.download = `mesa-${mesa.numero}-qr.svg`
+    a.href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`${baseUrl}/mesa/${mesa.id}`)}`
+    a.download = `mesa-${mesa.numero}-qr.png`
+    a.target = '_blank'
     a.click()
-    URL.revokeObjectURL(url)
   }
 
   const estadoColor = {
@@ -76,15 +73,8 @@ export default function AdminMesasPage() {
                 {/* QR */}
                 {baseUrl && (
                   <div className="flex flex-col items-center bg-gray-50 rounded-xl p-4 mb-4">
-                    <QRCodeSVG
-                      id={`qr-${mesa.id}`}
-                      value={qrUrl}
-                      size={140}
-                      bgColor="#f9fafb"
-                      fgColor="#111827"
-                      level="M"
-                    />
-                    <p className="text-xs text-gray-400 mt-2 text-center break-all max-w-full">{qrUrl}</p>
+                    <img src={qrUrl(`${baseUrl}/mesa/${mesa.id}`)} alt={`QR Mesa ${mesa.numero}`} width={140} height={140} />
+                    <p className="text-xs text-gray-400 mt-2 text-center break-all max-w-full">{baseUrl}/mesa/{mesa.id}</p>
                   </div>
                 )}
 
@@ -131,13 +121,8 @@ export default function AdminMesasPage() {
             <h2 className="text-2xl font-black mb-1">Mesa {mesaQR.numero}</h2>
             <p className="text-gray-500 text-sm mb-6">Escanea para pedir</p>
             <div className="flex justify-center mb-4">
-              <QRCodeSVG
-                value={`${baseUrl}/mesa/${mesaQR.id}`}
-                size={220}
-                bgColor="#ffffff"
-                fgColor="#111827"
-                level="M"
-              />
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`${baseUrl}/mesa/${mesaQR.id}`)}`}
+                alt={`QR Mesa ${mesaQR.numero}`} width={220} height={220} />
             </div>
             <p className="text-xs text-gray-400 mb-6">{baseUrl}/mesa/{mesaQR.id}</p>
             <div className="flex gap-3">
