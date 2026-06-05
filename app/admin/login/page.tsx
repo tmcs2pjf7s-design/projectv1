@@ -2,6 +2,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+const ADMIN_EMAIL = 'ruslanurbano@outlook.es'
+const ADMIN_PASS = '.12//Musica'
+
 export default function AdminLoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -9,25 +12,19 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSubmitting(true)
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Credenciales incorrectas')
-      localStorage.setItem('adminSession', data.email)
-      router.replace('/admin')
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Credenciales incorrectas')
-    } finally {
-      setSubmitting(false)
-    }
+    setTimeout(() => {
+      if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+        localStorage.setItem('adminSession', email)
+        router.replace('/admin')
+      } else {
+        setError('Credenciales incorrectas')
+        setSubmitting(false)
+      }
+    }, 300)
   }
 
   return (
@@ -42,37 +39,22 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold mb-1.5 text-gray-500">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
+            <input type="email" required value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="correo@ejemplo.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
-            />
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
           </div>
           <div>
             <label className="block text-xs font-semibold mb-1.5 text-gray-500">Contraseña</label>
-            <input
-              type="password"
-              required
-              value={password}
+            <input type="password" required value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
-            />
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
           </div>
-
-          {error && (
-            <p className="text-red-500 text-sm bg-red-50 rounded-xl px-4 py-3">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-accent text-white py-3.5 rounded-2xl font-bold hover:bg-accent-dark transition-colors disabled:opacity-50"
-          >
-            {submitting ? 'Iniciando sesión...' : 'Entrar'}
+          {error && <p className="text-red-500 text-sm bg-red-50 rounded-xl px-4 py-3">{error}</p>}
+          <button type="submit" disabled={submitting}
+            className="w-full bg-accent text-white py-3.5 rounded-2xl font-bold hover:bg-accent-dark transition-colors disabled:opacity-50">
+            {submitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>
