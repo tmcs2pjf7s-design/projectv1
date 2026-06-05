@@ -2,9 +2,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const ADMIN_EMAIL = 'ruslanurbano@outlook.es'
-const ADMIN_PASS = '.12//Musica'
-
 export default function AdminLoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -12,19 +9,28 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSubmitting(true)
-    setTimeout(() => {
-      if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      if (res.ok) {
         localStorage.setItem('adminSession', email)
         router.replace('/admin')
       } else {
-        setError('Credenciales incorrectas')
-        setSubmitting(false)
+        const data = await res.json()
+        setError(data.error ?? 'Credenciales incorrectas')
       }
-    }, 300)
+    } catch {
+      setError('Error de conexión. Inténtalo de nuevo.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
